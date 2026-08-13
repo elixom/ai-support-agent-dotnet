@@ -4,13 +4,16 @@ using backend.Models;
 
 namespace backend.Controllers;
 
+[Route("")]
 public class HomeController : Controller
 {
+    [HttpGet("")]
     public IActionResult Index()
     {
         return View();
     }
 
+    [HttpGet("Home/Privacy")]
     public IActionResult Privacy()
     {
         return View();

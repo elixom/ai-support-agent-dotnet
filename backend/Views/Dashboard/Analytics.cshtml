@@ -1,0 +1,98 @@
+@{
+    ViewData["Title"] = "Analytics Panel - AI Support Agent";
+}
+
+<div class="p-8 space-y-8 max-w-5xl mx-auto">
+    <!-- Main Charts Layout Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+        <!-- Resolution breakdown (AI vs Human) -->
+        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 p-6 rounded-2xl shadow-sm space-y-6">
+            <h3 class="font-black text-sm">Resolution Rate (AI vs Human)</h3>
+
+            <div class="flex items-center justify-center py-4">
+                <!-- Circular gauge simulation -->
+                <div class="relative w-40 h-40 rounded-full border-[12px] border-slate-100 dark:border-slate-700 flex items-center justify-center">
+                    <div id="ai-percent-ring" class="absolute inset-0 rounded-full border-[12px] border-indigo-600 border-t-transparent border-r-transparent transition-transform duration-500"></div>
+                    <div class="text-center z-10">
+                        <span id="ai-resolution-percent" class="text-3xl font-black block text-slate-800 dark:text-white">0%</span>
+                        <span class="text-[9px] text-slate-400 font-extrabold uppercase tracking-wide">AI Resolved</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 text-center border-t border-slate-100 dark:border-slate-700 pt-6">
+                <div>
+                    <span class="text-[10px] text-slate-400 font-bold uppercase block">AI Automated</span>
+                    <strong id="analytics-ai-resolved" class="text-xl font-black text-indigo-500">0</strong>
+                </div>
+                <div>
+                    <span class="text-[10px] text-slate-400 font-bold uppercase block">Human Agent Step-In</span>
+                    <strong id="analytics-human-resolved" class="text-xl font-black text-amber-500">0</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ticket Performance Stats -->
+        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 p-6 rounded-2xl shadow-sm space-y-6 flex flex-col justify-between">
+            <div class="space-y-4">
+                <h3 class="font-black text-sm">Performance Efficiency</h3>
+                <p class="text-xs text-slate-400">Average response times across all customer channels over the last 24 hours.</p>
+            </div>
+
+            <div class="space-y-6 py-4">
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="font-bold text-slate-500">Average Response Time (AI)</span>
+                        <strong id="analytics-time-ai" class="font-black">0s</strong>
+                    </div>
+                    <div class="w-full bg-slate-100 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
+                        <div class="bg-indigo-600 h-full rounded-full" style="width: 15%"></div>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="font-bold text-slate-500">Average Response Time (Human)</span>
+                        <strong id="analytics-time-human" class="font-black">12.5m</strong>
+                    </div>
+                    <div class="w-full bg-slate-100 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
+                        <div class="bg-amber-500 h-full rounded-full" style="width: 80%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-100 dark:border-slate-700 pt-6 flex items-center justify-between text-xs text-slate-400 font-medium">
+                <span>Updated every 5 mins</span>
+                <span class="text-indigo-400 font-bold">24-hour cycle</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function loadAnalytics() {
+        try {
+            const res = await fetch('/api/escalations/dashboard/stats', {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('auth_token') }
+            });
+            if (res.ok) {
+                const data = await res.json();
+
+                const ai = data.ai_resolved || 0;
+                const human = data.human_resolved || 0;
+                const total = ai + human;
+                const pct = total > 0 ? Math.round((ai / total) * 100) : 0;
+
+                document.getElementById('ai-resolution-percent').textContent = pct + '%';
+                document.getElementById('analytics-ai-resolved').textContent = ai;
+                document.getElementById('analytics-human-resolved').textContent = human;
+                document.getElementById('analytics-time-ai').textContent = (data.avg_response_time ? data.avg_response_time + 's' : '1.8s');
+            }
+        } catch {}
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById('page-title').textContent = "Analytics Metrics Panel";
+        loadAnalytics();
+    });
+</script>

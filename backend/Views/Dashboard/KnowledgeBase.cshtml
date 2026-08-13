@@ -1,0 +1,136 @@
+@{
+    ViewData["Title"] = "Knowledge Base Manager - AI Support Agent";
+}
+
+<div class="p-8 max-w-5xl mx-auto space-y-8">
+    <!-- Header with upload option -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-xl font-black text-slate-800 dark:text-white">Knowledge Base Manager</h2>
+            <p class="text-xs text-slate-400 mt-1">Upload files (.txt / .md) to split, embed, and feed into your AI Support Agent's semantic search.</p>
+        </div>
+        <button onclick="toggleUploadModal()" class="px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-lg shadow-indigo-500/20 transition-all flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+            Upload Document
+        </button>
+    </div>
+
+    <!-- Scrollable Chunks Table -->
+    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 p-6 rounded-2xl shadow-sm">
+        <h3 class="font-black text-sm mb-4">Document Chunks</h3>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead>
+                    <tr class="border-b border-slate-100 dark:border-slate-700 text-slate-400 uppercase font-extrabold">
+                        <th class="py-3 pr-4">Category</th>
+                        <th class="py-3">Content Extract</th>
+                        <th class="py-3 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="chunks-table-body" class="divide-y divide-slate-50 dark:divide-slate-700/40">
+                    <tr>
+                        <td colspan="3" class="py-8 text-center text-slate-400">Loading document chunks...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Upload Document Modal -->
+    <div id="upload-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="font-black text-sm">Upload Document</h3>
+                <button onclick="toggleUploadModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <form onsubmit="handleUploadSubmit(event)" id="upload-form" class="space-y-4">
+                <div class="space-y-1">
+                    <label class="text-xs font-semibold text-slate-500">Category</label>
+                    <select id="upload-category" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-xs outline-none text-slate-900 dark:text-white focus:border-indigo-500">
+                        <option value="general">General</option>
+                        <option value="billing">Billing</option>
+                        <option value="technical">Technical</option>
+                        <option value="account">Account</option>
+                    </select>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-semibold text-slate-500">Select File (.txt / .md)</label>
+                    <input id="upload-file" type="file" accept=".txt,.md" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-xs outline-none text-slate-500" />
+                </div>
+                <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-lg shadow-indigo-500/20 transition-colors">Upload and Process</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function loadChunks() {
+        try {
+            const res = await fetch('/api/knowledge', {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('auth_token') }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                const tbody = document.getElementById('chunks-table-body');
+
+                if (data.length > 0) {
+                    tbody.innerHTML = data.map(c => `
+                        <tr>
+                            <td class="py-4 pr-4"><span class="px-2.5 py-1 rounded bg-indigo-50 dark:bg-indigo-950/20 text-indigo-500 font-bold uppercase text-[9px]">${c.category}</span></td>
+                            <td class="py-4 text-slate-600 dark:text-slate-300 font-medium truncate max-w-md">${c.content}</td>
+                            <td class="py-4 text-right">
+                                <span class="text-slate-300 dark:text-slate-600">Saved</span>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="3" class="py-8 text-center text-slate-400">No knowledge base items found. Please upload a document to get started.</td></tr>`;
+                }
+            }
+        } catch {}
+    }
+
+    function toggleUploadModal() {
+        const modal = document.getElementById('upload-modal');
+        modal.classList.toggle('hidden');
+    }
+
+    async function handleUploadSubmit(e) {
+        e.preventDefault();
+
+        const fileInput = document.getElementById('upload-file');
+        const categorySelect = document.getElementById('upload-category');
+
+        if (!fileInput.files.length) return;
+
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        formData.append('category', categorySelect.value);
+
+        try {
+            const res = await fetch('/api/knowledge-base/upload', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('auth_token') },
+                body: formData
+            });
+
+            if (res.ok) {
+                toggleUploadModal();
+                loadChunks();
+                document.getElementById('upload-form').reset();
+            } else {
+                alert('Failed to process file upload. Please verify the file is standard plain text.');
+            }
+        } catch (ex) {
+            alert('Upload exception: ' + ex.message);
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById('page-title').textContent = "Knowledge Base Manager";
+        loadChunks();
+    });
+</script>

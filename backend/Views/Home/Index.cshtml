@@ -1,8 +1,177 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "AI Support Agent - Multi-Channel Customer Support";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- Hero Section -->
+<div class="relative overflow-hidden bg-slate-900 text-white pt-24 pb-20 px-8">
+    <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-12">
+        <div class="flex-1 space-y-6">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-xs font-semibold text-indigo-300">
+                <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span> Production Ready
+            </div>
+            <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">
+                Replace a 3-person support team with <span class="text-indigo-400">Autonomous AI</span>
+            </h1>
+            <p class="text-lg text-slate-300">
+                Handles WhatsApp, Telegram, Email, and Web Chat automatically. Powered by Claude Haiku and Sonnet on Azure AI Foundry. Costs ~$85/mo instead of $1,500+ on Intercom or Zendesk.
+            </p>
+            <div class="flex flex-wrap gap-4 pt-4">
+                <a href="/Auth/Signup" class="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-sm font-semibold shadow-lg shadow-indigo-500/20 transition-all">Start Free Signup</a>
+                <a href="/Auth/Login" class="px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-sm font-semibold transition-all">Agent Sign In</a>
+            </div>
+        </div>
+        <div class="flex-1 w-full max-w-md bg-slate-800/80 border border-slate-700 rounded-3xl p-6 shadow-2xl relative">
+            <h3 class="font-bold text-lg mb-4 text-indigo-300">How It Works</h3>
+            <ul class="space-y-4">
+                <li class="flex gap-3">
+                    <span class="w-6 h-6 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-xs font-bold flex items-center justify-center text-indigo-300 shrink-0">1</span>
+                    <div>
+                        <strong class="block text-sm">Customer Message Intake</strong>
+                        <span class="text-xs text-slate-400">Incoming text from WhatsApp, Telegram, Email, or Webchat normalized instantly.</span>
+                    </div>
+                </li>
+                <li class="flex gap-3">
+                    <span class="w-6 h-6 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-xs font-bold flex items-center justify-center text-indigo-300 shrink-0">2</span>
+                    <div>
+                        <strong class="block text-sm">RAG Retrieval & Cosine Similarity</strong>
+                        <span class="text-xs text-slate-400">Quickly scans SQL Server knowledge chunks to retrieve context for the query.</span>
+                    </div>
+                </li>
+                <li class="flex gap-3">
+                    <span class="w-6 h-6 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-xs font-bold flex items-center justify-center text-indigo-300 shrink-0">3</span>
+                    <div>
+                        <strong class="block text-sm">Claude Generation & Guardrails</strong>
+                        <span class="text-xs text-slate-400">Sonnet drafts a professional response, scanned by C# regex compliance filters.</span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
 </div>
+
+<!-- Features Section -->
+<div class="py-20 bg-slate-50 dark:bg-slate-900 px-8">
+    <div class="max-w-5xl mx-auto space-y-12">
+        <div class="text-center space-y-4">
+            <h2 class="text-3xl font-extrabold text-slate-800 dark:text-white">Multi-Channel AI Support</h2>
+            <p class="text-slate-500 dark:text-slate-400 max-w-lg mx-auto">Unified AI agent handles multiple communication channels simultaneously, syncing with your agent dashboard.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="p-6 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50 rounded-2xl shadow-sm">
+                <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                </div>
+                <h3 class="font-bold mb-2">WhatsApp Cloud</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Fully integrated with the official Meta WhatsApp API to receive and reply automatically.</p>
+            </div>
+            <div class="p-6 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50 rounded-2xl shadow-sm">
+                <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                </div>
+                <h3 class="font-bold mb-2">Email (Gmail)</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Monitors your support inbox, drafts grounded context answers, and resolves emails cleanly.</p>
+            </div>
+            <div class="p-6 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50 rounded-2xl shadow-sm">
+                <div class="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                </div>
+                <h3 class="font-bold mb-2">Web Chat Widget</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Embeddable raw WebSocket chat bubble that gives customers sub-second answers 24/7.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Web Chat Widget -->
+<div id="chat-widget" class="fixed bottom-6 right-6 z-50">
+    <button onclick="toggleChat()" class="w-14 h-14 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg flex items-center justify-center transition-transform hover:scale-105">
+        <svg id="chat-icon-open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+        <svg id="chat-icon-close" class="hidden w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
+    <div id="chat-window" class="hidden fixed bottom-24 right-6 w-96 h-[480px] bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 flex flex-col overflow-hidden">
+        <div class="bg-indigo-600 px-5 py-4 flex items-center justify-between text-white">
+            <div>
+                <h3 class="font-bold text-sm">Demo Live Chat</h3>
+                <p class="text-xs text-indigo-200">Talk to Claude Agent</p>
+            </div>
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+        </div>
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50 dark:bg-slate-900/50">
+            <div class="max-w-[80%] rounded-2xl px-4 py-2 bg-white dark:bg-slate-800 text-xs text-slate-500 shadow-sm border border-slate-100 dark:border-slate-700">
+                Hi! Ask me anything about our pricing plans, updates, or policies to see how the RAG compliance search works.
+            </div>
+        </div>
+        <div class="p-3 bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700 flex gap-2">
+            <input id="chat-input" type="text" placeholder="Ask about Starter plan..." onkeydown="if(event.key==='Enter') sendChatMessage()" class="flex-1 bg-slate-50 dark:bg-slate-900 rounded-xl px-4 py-2 text-xs border border-slate-200 dark:border-slate-700 outline-none text-slate-900 dark:text-white" />
+            <button onclick="sendChatMessage()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold">Send</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let ws = null;
+    let senderId = 'demo_' + Math.random().toString(36).substring(7);
+
+    function toggleChat() {
+        const win = document.getElementById('chat-window');
+        const iconOpen = document.getElementById('chat-icon-open');
+        const iconClose = document.getElementById('chat-icon-close');
+
+        if (win.classList.contains('hidden')) {
+            win.classList.remove('hidden');
+            iconOpen.classList.add('hidden');
+            iconClose.classList.remove('hidden');
+            connectWebSocket();
+        } else {
+            win.classList.add('hidden');
+            iconOpen.classList.remove('hidden');
+            iconClose.classList.add('hidden');
+        }
+    }
+
+    function connectWebSocket() {
+        if (ws) return;
+        const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+        ws = new WebSocket(`${protocol}://${window.location.host}/ws/chat/`);
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            appendMessage('assistant', data.message || data.response);
+        };
+    }
+
+    function sendChatMessage() {
+        const inp = document.getElementById('chat-input');
+        const text = inp.value.trim();
+        if (!text) return;
+
+        appendMessage('user', text);
+        inp.value = '';
+
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JsonStringify({ message: text, sender_id: senderId, sender_name: 'Visitor' }));
+        }
+    }
+
+    function appendMessage(role, text) {
+        const list = document.getElementById('chat-messages');
+        const isUser = role === 'user';
+        const wrapper = document.createElement('div');
+        wrapper.className = `flex ${isUser ? 'justify-end' : 'justify-start'}`;
+
+        const bubble = document.createElement('div');
+        bubble.className = `max-w-[80%] rounded-2xl px-4 py-2.5 text-xs shadow-sm ${
+            isUser ? 'bg-indigo-600 text-white rounded-br-sm' : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-100 dark:border-slate-700 rounded-bl-sm'
+        }`;
+        bubble.textContent = text;
+
+        wrapper.appendChild(bubble);
+        list.appendChild(wrapper);
+        list.scrollTop = list.scrollHeight;
+    }
+
+    // JSON Helper safe from standard template parsers
+    function JsonStringify(obj) {
+        return JSON.stringify(obj);
+    }
+</script>

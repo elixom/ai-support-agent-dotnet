@@ -1,0 +1,137 @@
+@{
+    ViewData["Title"] = "Overview - AI Support Agent";
+}
+
+<div class="p-8 space-y-8 max-w-6xl mx-auto">
+    <!-- Quick Stats Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="p-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-[10px] font-extrabold uppercase text-slate-400">Total Tickets Today</span>
+                <h3 id="stat-today" class="text-3xl font-black mt-1">0</h3>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h2a2 2 0 002-2z"/></svg>
+            </div>
+        </div>
+        <div class="p-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-[10px] font-extrabold uppercase text-slate-400">Escalated Tickets</span>
+                <h3 id="stat-escalated" class="text-3xl font-black mt-1">0</h3>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            </div>
+        </div>
+        <div class="p-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-[10px] font-extrabold uppercase text-slate-400">Resolved by AI</span>
+                <h3 id="stat-resolved" class="text-3xl font-black mt-1">0</h3>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+        </div>
+        <div class="p-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-[10px] font-extrabold uppercase text-slate-400">Avg Response Time</span>
+                <h3 id="stat-response" class="text-3xl font-black mt-1">0s</h3>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Recent Escalations List -->
+        <div class="md:col-span-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 p-6 rounded-2xl shadow-sm space-y-4">
+            <h3 class="font-black text-sm text-slate-850 dark:text-white">Recent Escalation Handoffs</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead>
+                        <tr class="border-b border-slate-100 dark:border-slate-700 text-slate-400 uppercase font-extrabold">
+                            <th class="py-3">Sender Name</th>
+                            <th class="py-3">Escalation Reason</th>
+                            <th class="py-3">Status</th>
+                            <th class="py-3">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recent-escalations-table" class="divide-y divide-slate-50 dark:divide-slate-700/40">
+                        <tr>
+                            <td colspan="4" class="py-8 text-center text-slate-400">No recent escalations found.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Channel Breakdown (Circular meters/lists) -->
+        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 p-6 rounded-2xl shadow-sm space-y-4">
+            <h3 class="font-black text-sm text-slate-850 dark:text-white">Channel Breakdown</h3>
+            <div id="channel-list" class="space-y-3 pt-2">
+                <div class="text-xs text-center text-slate-400">Loading channel statistics...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function loadStats() {
+        try {
+            const res = await fetch('/api/escalations/dashboard/stats', {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('auth_token') }
+            });
+            if (res.ok) {
+                const data = await res.json();
+
+                document.getElementById('stat-today').textContent = data.total_tickets_today;
+                document.getElementById('stat-escalated').textContent = data.total_escalated;
+                document.getElementById('stat-resolved').textContent = data.ai_resolved;
+                document.getElementById('stat-response').textContent = (data.avg_response_time ? data.avg_response_time + 's' : '0s');
+
+                // Render Escalations
+                const tbody = document.getElementById('recent-escalations-table');
+                if (data.recent_escalations && data.recent_escalations.length > 0) {
+                    tbody.innerHTML = data.recent_escalations.map(e => `
+                        <tr>
+                            <td class="py-4 font-bold text-slate-800 dark:text-slate-100">${e.customer_name || 'Anonymous User'}</td>
+                            <td class="py-4 text-slate-500 uppercase font-semibold">${e.reason.replace('_', ' ')}</td>
+                            <td class="py-4">
+                                <span class="px-2 py-0.5 rounded-full text-[9px] font-bold ${e.status === 'resolved' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'} uppercase">
+                                    ${e.status}
+                                </span>
+                            </td>
+                            <td class="py-4">
+                                <a href="/Dashboard/Tickets" class="text-indigo-400 font-bold hover:underline">Take over</a>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-slate-400">No active escalations.</td></tr>`;
+                }
+
+                // Render Channel Breakdown
+                const channelList = document.getElementById('channel-list');
+                const channels = data.channel_breakdown || {};
+                const keys = Object.keys(channels);
+
+                if (keys.length > 0) {
+                    channelList.innerHTML = keys.map(k => `
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-bold text-slate-600 dark:text-slate-300 capitalize">${k}</span>
+                            <span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700/60 font-black text-slate-800 dark:text-slate-100">${channels[k]}</span>
+                        </div>
+                    `).join('');
+                } else {
+                    channelList.innerHTML = `<div class="text-xs text-center text-slate-400">No channel data.</div>`;
+                }
+            }
+        } catch {}
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById('page-title').textContent = "Dashboard Overview";
+        loadStats();
+    });
+</script>

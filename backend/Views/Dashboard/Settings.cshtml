@@ -1,0 +1,180 @@
+@{
+    ViewData["Title"] = "System Credentials Settings - AI Support Agent";
+}
+
+<div class="p-8 max-w-4xl mx-auto space-y-8">
+    <div>
+        <h2 class="text-xl font-black text-slate-800 dark:text-white">Credentials & Integrations</h2>
+        <p class="text-xs text-slate-400 mt-1">Configure your chat channels, keys, and webhook credentials securely.</p>
+    </div>
+
+    <!-- Direct AI Keys -->
+    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 p-6 rounded-2xl shadow-sm space-y-4">
+        <h3 class="font-black text-sm text-indigo-400">Direct AI API Integrations</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-1">
+                <label class="text-[10px] font-extrabold uppercase text-slate-400">Anthropic API Key</label>
+                <input id="key-anthropic" type="password" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-xs outline-none text-slate-900 dark:text-white" />
+            </div>
+            <div class="space-y-1">
+                <label class="text-[10px] font-extrabold uppercase text-slate-400">OpenAI API Key (Embeddings)</label>
+                <input id="key-openai" type="password" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-xs outline-none text-slate-900 dark:text-white" />
+            </div>
+        </div>
+        <button onclick="saveAIConfig()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-all">Save AI Keys</button>
+    </div>
+
+    <!-- WhatsApp Cloud Config -->
+    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 p-6 rounded-2xl shadow-sm space-y-4">
+        <h3 class="font-black text-sm text-indigo-400">WhatsApp Business Cloud API</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="space-y-1">
+                <label class="text-[10px] font-extrabold uppercase text-slate-400">Phone Number ID</label>
+                <input id="wa-phone" type="text" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-xs outline-none text-slate-900 dark:text-white" />
+            </div>
+            <div class="space-y-1">
+                <label class="text-[10px] font-extrabold uppercase text-slate-400">Verify Token (Custom)</label>
+                <input id="wa-verify" type="text" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-xs outline-none text-slate-900 dark:text-white" />
+            </div>
+            <div class="space-y-1 md:col-span-3">
+                <label class="text-[10px] font-extrabold uppercase text-slate-400">System Access Token</label>
+                <input id="wa-token" type="password" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-xs outline-none text-slate-900 dark:text-white" />
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="saveWhatsAppConfig()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-all">Save WhatsApp</button>
+            <button onclick="testWhatsAppConnection()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold transition-all">Test Connection</button>
+        </div>
+    </div>
+
+    <!-- Telegram Bot Config -->
+    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 p-6 rounded-2xl shadow-sm space-y-4">
+        <h3 class="font-black text-sm text-indigo-400">Telegram Bot Integration</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-1">
+                <label class="text-[10px] font-extrabold uppercase text-slate-400">Bot Username</label>
+                <input id="tg-username" type="text" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-xs outline-none text-slate-900 dark:text-white" placeholder="@@MyBot" />
+            </div>
+            <div class="space-y-1">
+                <label class="text-[10px] font-extrabold uppercase text-slate-400">Bot Token (from @@BotFather)</label>
+                <input id="tg-token" type="password" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-xs outline-none text-slate-900 dark:text-white" />
+            </div>
+        </div>
+        <button onclick="saveTelegramConfig()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-all">Save Telegram</button>
+    </div>
+</div>
+
+<script>
+    async function loadSettings() {
+        // Load AI Keys
+        try {
+            const res = await fetch('/api/Team/ai', {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('auth_token') }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                document.getElementById('key-anthropic').value = data.anthropic_api_key || '';
+                document.getElementById('key-openai').value = data.openai_api_key || '';
+            }
+        } catch {}
+
+        // Load WhatsApp Config
+        try {
+            const res = await fetch('/api/Team/whatsapp', {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('auth_token') }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                document.getElementById('wa-phone').value = data.phone_number_id || '';
+                document.getElementById('wa-verify').value = data.verify_token || '';
+                document.getElementById('wa-token').value = data.access_token || '';
+            }
+        } catch {}
+
+        // Load Telegram Config
+        try {
+            const res = await fetch('/api/Team/telegram', {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('auth_token') }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                document.getElementById('tg-username').value = data.bot_username || '';
+                document.getElementById('tg-token').value = data.bot_token || '';
+            }
+        } catch {}
+    }
+
+    async function saveAIConfig() {
+        const anthropic_api_key = document.getElementById('key-anthropic').value;
+        const openai_api_key = document.getElementById('key-openai').value;
+
+        try {
+            const res = await fetch('/api/Team/ai', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('auth_token')
+                },
+                body: JSON.stringify({ anthropic_api_key, openai_api_key })
+            });
+            if (res.ok) alert('AI configurations saved successfully.');
+        } catch {}
+    }
+
+    async function saveWhatsAppConfig() {
+        const phone_number_id = document.getElementById('wa-phone').value;
+        const verify_token = document.getElementById('wa-verify').value;
+        const access_token = document.getElementById('wa-token').value;
+
+        try {
+            const res = await fetch('/api/Team/whatsapp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('auth_token')
+                },
+                body: JSON.stringify({ phone_number_id, verify_token, access_token })
+            });
+            if (res.ok) alert('WhatsApp credentials saved.');
+        } catch {}
+    }
+
+    async function testWhatsAppConnection() {
+        try {
+            const res = await fetch('/api/Team/whatsapp/test', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('auth_token') }
+            });
+            const data = await res.json();
+            if (res.ok) {
+                alert(`Successfully Connected!\nVerified Name: ${data.verified_name}\nQuality Rating: ${data.quality_rating}`);
+            } else {
+                alert('Connection test failed:\n' + JSON.stringify(data));
+            }
+        } catch (ex) {
+            alert('Test Exception: ' + ex.message);
+        }
+    }
+
+    async function saveTelegramConfig() {
+        const bot_username = document.getElementById('tg-username').value;
+        const bot_token = document.getElementById('tg-token').value;
+
+        try {
+            const res = await fetch('/api/Team/telegram', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('auth_token')
+                },
+                body: JSON.stringify({ bot_username, bot_token })
+            });
+            if (res.ok) alert('Telegram bot credentials saved.');
+        } catch {}
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById('page-title').textContent = "Settings Dashboard";
+        loadSettings();
+    });
+</script>
