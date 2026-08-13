@@ -38,3 +38,13 @@ dashboard/out/
 
 # Docker
 postgres_data/
+
+# .NET
+backend/bin/
+backend/obj/
+backend/TestResults/
+backend.Tests/bin/
+backend.Tests/obj/
+backend.Tests/TestResults/
+*.user
+*.suo
