@@ -1,0 +1,132 @@
+@{
+    ViewData["Title"] = "Canned Responses Shortcuts - AI Support Agent";
+}
+
+<div class="p-8 max-w-5xl mx-auto space-y-8">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-xl font-black text-slate-800 dark:text-white">Canned Responses Shortcuts</h2>
+            <p class="text-xs text-slate-400 mt-1">Configure reply templates with short key triggers that agents can instantly expand during conversations.</p>
+        </div>
+        <button onclick="toggleCannedModal()" class="px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-lg shadow-indigo-500/20 transition-all flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Add Shortcut
+        </button>
+    </div>
+
+    <!-- Shortcuts Grid -->
+    <div id="canned-responses-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="md:col-span-2 text-center py-12 text-slate-400 text-xs">Loading response shortcuts...</div>
+    </div>
+
+    <!-- Canned Modal -->
+    <div id="canned-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="font-black text-sm">Add Canned Response</h3>
+                <button onclick="toggleCannedModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <form onsubmit="handleCannedSubmit(event)" id="canned-form" class="space-y-4">
+                <div class="space-y-1">
+                    <label class="text-xs font-semibold text-slate-500">Shortcut (e.g. /pricing)</label>
+                    <input id="canned-shortcut" type="text" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-xs outline-none text-slate-900 dark:text-white focus:border-indigo-500" placeholder="/pricing" />
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-semibold text-slate-500">Response Title</label>
+                    <input id="canned-title" type="text" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-xs outline-none text-slate-900 dark:text-white focus:border-indigo-500" placeholder="Starter and Professional Plans Overview" />
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-semibold text-slate-500">Response Text Body</label>
+                    <textarea id="canned-content" required rows="4" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-xs outline-none text-slate-900 dark:text-white focus:border-indigo-500" placeholder="Our plans start at $9/mo..."></textarea>
+                </div>
+                <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-lg shadow-indigo-500/20 transition-colors">Save Shortcut</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function loadCanned() {
+        try {
+            const res = await fetch('/api/canned-responses', {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('auth_token') }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                const grid = document.getElementById('canned-responses-grid');
+
+                if (data.length > 0) {
+                    grid.innerHTML = data.map(r => `
+                        <div class="p-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl shadow-sm relative space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="px-2.5 py-1 rounded bg-indigo-500/10 text-indigo-500 font-black text-[10px] uppercase">${r.shortcut}</span>
+                                <button onclick="deleteCanned('${r.id}')" class="text-slate-300 hover:text-rose-500 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                            </div>
+                            <h4 class="font-extrabold text-xs text-slate-800 dark:text-white">${r.title}</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium line-clamp-3">${r.content}</p>
+                        </div>
+                    `).join('');
+                } else {
+                    grid.innerHTML = `<div class="md:col-span-2 p-12 text-center text-slate-400 bg-white dark:bg-slate-800 border border-dashed border-slate-200 dark:border-slate-700 rounded-2xl text-xs">No shortcuts configured. Click "Add Shortcut" to create reusable reply templates.</div>`;
+                }
+            }
+        } catch {}
+    }
+
+    function toggleCannedModal() {
+        document.getElementById('canned-modal').classList.toggle('hidden');
+    }
+
+    async function handleCannedSubmit(e) {
+        e.preventDefault();
+
+        const shortcut = document.getElementById('canned-shortcut').value;
+        const title = document.getElementById('canned-title').value;
+        const content = document.getElementById('canned-content').value;
+
+        try {
+            const res = await fetch('/api/canned-responses', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('auth_token')
+                },
+                body: JSON.stringify({ shortcut, title, content })
+            });
+
+            if (res.ok) {
+                toggleCannedModal();
+                loadCanned();
+                document.getElementById('canned-form').reset();
+            } else {
+                alert('A shortcut with this trigger already exists.');
+            }
+        } catch (ex) {
+            alert('Save exception: ' + ex.message);
+        }
+    }
+
+    async function deleteCanned(id) {
+        if (!confirm('Are you sure you want to delete this shortcut?')) return;
+        try {
+            const res = await fetch('/api/canned-responses/' + id, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('auth_token') }
+            });
+            if (res.status === 204 || res.ok) {
+                loadCanned();
+            }
+        } catch {}
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById('page-title').textContent = "Reply Keyboard Shortcuts";
+        loadCanned();
+    });
+</script>

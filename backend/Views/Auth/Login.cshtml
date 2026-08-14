@@ -1,0 +1,64 @@
+@{
+    ViewData["Title"] = "Agent Sign In - AI Support Agent";
+}
+
+<div class="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 px-8 py-12">
+    <div class="w-full max-w-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 p-8 rounded-3xl shadow-xl space-y-6">
+        <div class="text-center space-y-2">
+            <h1 class="text-2xl font-black text-slate-900 dark:text-white">Welcome Back</h1>
+            <p class="text-sm text-slate-400">Sign in to your customer support agent account.</p>
+        </div>
+
+        <div id="error-alert" class="hidden p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs font-semibold text-rose-500"></div>
+
+        <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
+            <div class="space-y-1">
+                <label class="text-xs font-semibold text-slate-500 dark:text-slate-400">Email Address</label>
+                <input id="email" type="email" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm outline-none text-slate-900 dark:text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" placeholder="admin@example.com" />
+            </div>
+            <div class="space-y-1">
+                <label class="text-xs font-semibold text-slate-500 dark:text-slate-400">Password</label>
+                <input id="password" type="password" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm outline-none text-slate-900 dark:text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" placeholder="••••••••" />
+            </div>
+            <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold shadow-lg shadow-indigo-500/20 transition-colors">Sign In</button>
+        </form>
+
+        <p class="text-center text-xs text-slate-400">
+            Don't have an account? <a href="/Auth/Signup" class="text-indigo-400 font-semibold hover:underline">Sign up for free</a>
+        </p>
+    </div>
+</div>
+
+<script>
+    async function handleLoginSubmit(e) {
+        e.preventDefault();
+        const errAlert = document.getElementById('error-alert');
+        errAlert.classList.add('hidden');
+
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem('auth_token', data.token);
+                localStorage.setItem('auth_user', JSON.stringify(data.user));
+                localStorage.setItem('auth_team', JSON.stringify(data.team));
+                window.location.href = '/Dashboard';
+            } else {
+                const err = await response.json();
+                errAlert.textContent = err.detail || err.message || 'Authentication failed.';
+                errAlert.classList.remove('hidden');
+            }
+        } catch (ex) {
+            errAlert.textContent = 'Connection error. Please try again.';
+            errAlert.classList.remove('hidden');
+        }
+    }
+</script>

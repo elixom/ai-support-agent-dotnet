@@ -1,0 +1,247 @@
+@{
+    ViewData["Title"] = "Tickets Workspace - AI Support Agent";
+}
+
+<div class="flex h-[calc(100vh-4rem)] overflow-hidden bg-slate-50 dark:bg-slate-900">
+    <!-- Left Panel: Ticket Queue -->
+    <div class="w-80 border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0 bg-white dark:bg-slate-900 overflow-hidden">
+        <!-- Tabs -->
+        <div class="h-14 px-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+            <h3 class="font-black text-sm">Conversations</h3>
+            <span id="ticket-count" class="px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-500 text-[10px] font-bold">0</span>
+        </div>
+        <div class="h-12 border-b border-slate-100 dark:border-slate-800/60 flex items-center px-2 gap-1 bg-slate-50/50 dark:bg-slate-900/50">
+            <button onclick="setQueueFilter('active')" id="btn-filter-active" class="flex-1 py-1.5 text-center text-xs font-bold rounded-lg bg-indigo-600 text-white shadow-sm transition-all">Active</button>
+            <button onclick="setQueueFilter('escalated')" id="btn-filter-escalated" class="flex-1 py-1.5 text-center text-xs font-semibold rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-white transition-all">Escalated</button>
+            <button onclick="setQueueFilter('resolved')" id="btn-filter-resolved" class="flex-1 py-1.5 text-center text-xs font-semibold rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-white transition-all">Resolved</button>
+        </div>
+
+        <!-- Scrollable Ticket List -->
+        <div id="ticket-list" class="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/50">
+            <div class="p-8 text-center text-slate-400 text-xs">Loading conversations...</div>
+        </div>
+    </div>
+
+    <!-- Middle Panel: Active Conversation & Reply Space -->
+    <div id="empty-workspace" class="flex-1 flex flex-col items-center justify-center p-8 text-center bg-slate-50 dark:bg-slate-900/50">
+        <div class="w-16 h-14 rounded-2xl bg-indigo-50 dark:bg-slate-800 flex items-center justify-center text-indigo-500 mb-4 shadow-sm">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+        </div>
+        <h3 class="font-extrabold text-slate-800 dark:text-white">No Ticket Selected</h3>
+        <p class="text-xs text-slate-400 max-w-xs mt-1">Select a ticket from the sidebar queue to start monitoring live AI responses or stepping in manually.</p>
+    </div>
+
+    <div id="chat-workspace" class="hidden flex-1 flex flex-col overflow-hidden bg-white dark:bg-slate-900">
+        <!-- Chat Header -->
+        <div class="h-14 px-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-3">
+                <span id="active-channel-badge" class="px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-500 text-[10px] font-bold uppercase"></span>
+                <h4 id="active-sender-name" class="font-black text-sm">Select sender</h4>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="toggleHumanOnly()" id="btn-human-only" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                    Human Only
+                </button>
+            </div>
+        </div>
+
+        <!-- Messages stream -->
+        <div id="messages-container" class="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50 dark:bg-slate-900/50"></div>
+
+        <!-- Chat Footer (Inputs and Actions) -->
+        <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
+            <div class="flex gap-2">
+                <input id="reply-input" type="text" placeholder="Type agent reply (Ctrl+Enter to send)..." onkeydown="if(event.ctrlKey && event.key==='Enter') sendAgentReply()" class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-xs outline-none text-slate-900 dark:text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" />
+                <button onclick="sendAgentReply()" class="px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-lg shadow-indigo-500/20 transition-all">Send Reply</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel: AI Sidebar (Visible when escalated) -->
+    <div id="ai-sidebar" class="hidden w-80 border-l border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 p-6 flex flex-col gap-6 overflow-y-auto shrink-0">
+        <div class="space-y-2">
+            <h3 class="font-bold text-sm text-indigo-400">AI Assistant Summary</h3>
+            <p id="ai-summary" class="text-xs text-slate-500 leading-relaxed bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50 p-4 rounded-xl shadow-sm">AI summary not available.</p>
+        </div>
+        <div class="space-y-2">
+            <h3 class="font-bold text-sm text-indigo-400">Suggested Action</h3>
+            <p id="ai-suggested" class="text-xs text-slate-500 leading-relaxed bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50 p-4 rounded-xl shadow-sm">No suggested response.</p>
+            <button onclick="applySuggestedResponse()" class="w-full py-2 bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-500 rounded-xl text-xs font-bold transition-all">Copy Suggestion</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let filterStatus = 'active';
+    let conversations = [];
+    let selectedId = null;
+
+    async function loadConversations() {
+        try {
+            const res = await fetch('/api/conversations', {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('auth_token') }
+            });
+            if (res.ok) {
+                conversations = await res.json();
+                renderTicketQueue();
+            }
+        } catch {}
+    }
+
+    function setQueueFilter(status) {
+        filterStatus = status;
+        ['active', 'escalated', 'resolved'].forEach(s => {
+            const btn = document.getElementById('btn-filter-' + s);
+            if (s === status) {
+                btn.className = "flex-1 py-1.5 text-center text-xs font-bold rounded-lg bg-indigo-600 text-white shadow-sm transition-all";
+            } else {
+                btn.className = "flex-1 py-1.5 text-center text-xs font-semibold rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-white transition-all";
+            }
+        });
+        renderTicketQueue();
+    }
+
+    function renderTicketQueue() {
+        const list = document.getElementById('ticket-list');
+        const countBadge = document.getElementById('ticket-count');
+        const filtered = conversations.filter(c => c.status === filterStatus);
+
+        countBadge.textContent = filtered.length;
+
+        if (filtered.length === 0) {
+            list.innerHTML = `<div class="p-8 text-center text-slate-400 text-xs">No ${filterStatus} tickets</div>`;
+            return;
+        }
+
+        list.innerHTML = filtered.map(c => `
+            <div onclick="selectTicket('${c.id}')" class="p-4 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer transition-all ${c.id === selectedId ? 'bg-indigo-50/40 dark:bg-slate-800/50 border-l-4 border-indigo-600' : ''}">
+                <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-xs font-extrabold text-indigo-400 uppercase">${c.channel}</span>
+                    <span class="text-[9px] text-slate-400 font-medium">${new Date(c.updated_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                </div>
+                <h4 class="font-bold text-xs truncate text-slate-800 dark:text-slate-100">${c.sender_name || c.sender_id}</h4>
+            </div>
+        `).join('');
+    }
+
+    async function selectTicket(id) {
+        selectedId = id;
+        renderTicketQueue();
+
+        const empty = document.getElementById('empty-workspace');
+        const work = document.getElementById('chat-workspace');
+        const aiSide = document.getElementById('ai-sidebar');
+
+        empty.classList.add('hidden');
+        work.classList.remove('hidden');
+
+        try {
+            const res = await fetch('/api/conversations/' + id, {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('auth_token') }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                document.getElementById('active-channel-badge').textContent = data.channel;
+                document.getElementById('active-sender-name').textContent = data.sender_name || data.sender_id;
+
+                // Human only toggle styling
+                const btn = document.getElementById('btn-human-only');
+                if (data.human_only) {
+                    btn.className = "px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-semibold transition-colors";
+                } else {
+                    btn.className = "px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors";
+                }
+
+                // Render Messages
+                const stream = document.getElementById('messages-container');
+                stream.innerHTML = data.messages.map(m => {
+                    const isCustomer = m.role === 'customer';
+                    const isAi = m.role === 'ai';
+                    return `
+                        <div class="flex ${isCustomer ? 'justify-start' : 'justify-end'}">
+                            <div class="max-w-[75%] rounded-2xl px-4 py-2.5 text-xs shadow-sm ${
+                                isCustomer
+                                    ? 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-100 dark:border-slate-700/60 rounded-bl-sm'
+                                    : (isAi ? 'bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 border border-indigo-100/50 dark:border-indigo-900/10 rounded-br-sm' : 'bg-indigo-600 text-white rounded-br-sm')
+                            }">
+                                <p class="leading-relaxed whitespace-pre-wrap">${m.content}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                stream.scrollTop = stream.scrollHeight;
+
+                // Load summaries if escalated
+                if (data.status === 'escalated') {
+                    aiSide.classList.remove('hidden');
+                    loadEscalationDetails(id);
+                } else {
+                    aiSide.classList.add('hidden');
+                }
+            }
+        } catch {}
+    }
+
+    async function loadEscalationDetails(conversationId) {
+        try {
+            const res = await fetch('/api/escalations?resolved=false', {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('auth_token') }
+            });
+            if (res.ok) {
+                const escalations = await res.json();
+                const matched = escalations.find(e => e.conversation?.id === conversationId);
+                if (matched) {
+                    document.getElementById('ai-summary').textContent = matched.ai_summary || "AI summary not available.";
+                    document.getElementById('ai-suggested').textContent = matched.suggested_response || "No suggested response.";
+                }
+            }
+        } catch {}
+    }
+
+    function applySuggestedResponse() {
+        const text = document.getElementById('ai-suggested').textContent;
+        document.getElementById('reply-input').value = text;
+    }
+
+    async function sendAgentReply() {
+        const inp = document.getElementById('reply-input');
+        const text = inp.value.trim();
+        if (!text || !selectedId) return;
+
+        try {
+            const res = await fetch(`/api/conversations/${selectedId}/reply`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('auth_token')
+                },
+                body: JSON.stringify({ message: text, agent_name: 'Dashboard Agent' })
+            });
+
+            if (res.ok) {
+                inp.value = '';
+                selectTicket(selectedId);
+            }
+        } catch {}
+    }
+
+    async function toggleHumanOnly() {
+        if (!selectedId) return;
+        try {
+            const res = await fetch(`/api/conversations/${selectedId}/toggle-human-only`, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('auth_token') }
+            });
+            if (res.ok) {
+                selectTicket(selectedId);
+            }
+        } catch {}
+    }
+
+    // Mount lifecycle
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById('page-title').textContent = "Conversations Workspace";
+        loadConversations();
+        setInterval(loadConversations, 5000); // Polling queue
+    });
+</script>
