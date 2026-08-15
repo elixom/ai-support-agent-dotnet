@@ -7,6 +7,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'backend/**'
+      - '.github/workflows/main_elixomsms-support-ai.yml'
   workflow_dispatch:
 
 jobs:
@@ -25,8 +28,10 @@ jobs:
 
       - name: Build with dotnet
         run: dotnet build --configuration Release
+        working-directory: backend
 
       - name: dotnet publish
+        working-directory: backend
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
       - name: Upload artifact for deployment job
