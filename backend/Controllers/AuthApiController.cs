@@ -18,7 +18,7 @@ namespace backend.Controllers
         private readonly ApplicationDbContext _db;
         private readonly ITokenService _tokenService;
 
-        public AuthController(ApplicationDbContext db, ITokenService tokenService)
+        public AuthApiController(ApplicationDbContext db, ITokenService tokenService)
         {
             _db = db;
             _tokenService = tokenService;
