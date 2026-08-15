@@ -5,7 +5,7 @@ namespace backend.Controllers
 {
     [AllowAnonymous] // Authorization state is checked securely on the client-side via JWT in LocalStorage!
     [Route("Dashboard")]
-    public class DashboardViewController : Controller
+    public class DashboardController : Controller
     {
         [HttpGet("")]
         public IActionResult Index()

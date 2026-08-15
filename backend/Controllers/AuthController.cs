@@ -5,7 +5,7 @@ namespace backend.Controllers
 {
     [AllowAnonymous]
     [Route("Auth")]
-    public class AuthViewController : Controller
+    public class AuthController : Controller
     {
         [HttpGet("Login")]
         public IActionResult Login()

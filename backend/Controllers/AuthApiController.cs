@@ -13,7 +13,7 @@ namespace backend.Controllers
 {
     [ApiController]
     [Route("api/auth")]
-    public class AuthController : BaseController
+    public class AuthApiController : BaseController
     {
         private readonly ApplicationDbContext _db;
         private readonly ITokenService _tokenService;
