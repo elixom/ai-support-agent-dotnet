@@ -429,6 +429,14 @@ dotnet test backend.Tests/backend.Tests.csproj
 
 ---
 
+## Memory System Guidelines
+Rules for Memory File Usage:
+Read on Start: At the beginning of any development task, the developer or AI assistant must read the root MEMORY.md and folder-specific memory files (php-src/MEMORY.md, dotnet-src/MEMORY.md) to establish full historical context, architectural patterns, and known issues.
+Update on End: At the end of every development task, the developer or AI assistant must update the root MEMORY.md and folder-specific memory files to record new learnings, resolved bugs, modified database schema mappings, implementation strategies, or pending structural refactorings.
+
+
+---
+
 ## Questions? Refer to:
 - **Django Original:** See `/CLAUDE.md` at project root
 - **Architecture:** See `architecture.mermaid`

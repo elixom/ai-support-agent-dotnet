@@ -21,8 +21,6 @@ credentials/
 google-credentials.json
 
 # IDE
-.vscode/
-.vscode/**
 .idea/
 *.swp
 *.swo
