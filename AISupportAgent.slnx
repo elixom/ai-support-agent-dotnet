@@ -1,4 +1,3 @@
 <Solution>
-  <Project Path="backend.Tests/backend.Tests.csproj" />
   <Project Path="backend/backend.csproj" />
 </Solution>

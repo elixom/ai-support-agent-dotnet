@@ -32,3 +32,8 @@
   - Verifies second delete returns `404 NotFound`.
   - Verifies deleted id is absent from subsequent list.
 - Relaxed seeded-list assertion from `>=10` to `>=1` to avoid shared-fixture order dependence.
+
+- Re-centered architecture as single-project full-stack ASP.NET Core app in `backend/` (MVC views + Web API controllers).
+- Updated CORS policy naming and dev origin to same-host frontend (`AllowFrontend`, localhost:8000).
+- Updated Gmail OAuth callback redirects to same app dashboard route (`/Dashboard/Settings`) rather than external port 3000.
+- Replaced `backend/AGENTS.md` with streamlined instructions aligned to single-project workflow and folder conventions.

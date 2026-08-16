@@ -151,7 +151,7 @@ namespace backend.Controllers
         [AllowAnonymous]
         public IActionResult RefreshToken([FromBody] RefreshRequest req)
         {
-            // Simple refresh token stub returning a mock token since Next.js holds user state
+            // Simple refresh token stub returning a mock token while client-side state is active
             // and we can simply issue a generic success.
             if (string.IsNullOrWhiteSpace(req.Refresh))
             {

@@ -19,9 +19,9 @@ var builder = WebApplication.CreateBuilder(args);
 // 1. CORS Configuration
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowNextJs", policy =>
+    options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "http://127.0.0.1:3000")
+        policy.WithOrigins("http://localhost:8000", "http://127.0.0.1:8000")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -129,7 +129,7 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
 }
 
-app.UseCors("AllowNextJs");
+app.UseCors("AllowFrontend");
 app.UseStaticFiles();
 
 // 8. WebSocket Middleware setup

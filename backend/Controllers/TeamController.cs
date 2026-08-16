@@ -491,7 +491,7 @@ namespace backend.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Callback([FromQuery] string? code, [FromQuery] string? state, [FromQuery] string? error)
         {
-            var dashboardUrl = "http://localhost:3000/settings/gmail";
+            var dashboardUrl = $"{Request.Scheme}://{Request.Host}/Dashboard/Settings";
 
             if (!string.IsNullOrEmpty(error))
             {

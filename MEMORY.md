@@ -16,3 +16,8 @@
 - Added backend integration testing infrastructure using `WebApplicationFactory<Program>` with forced InMemory DB and test auth scheme.
 - Added `KnowledgeBaseIntegrationTests` to verify authenticated `/api/knowledge` works against seeded InMemory data.
 - Added integration test coverage for `DELETE /api/knowledge/{id}` including second-delete `404` behavior.
+
+- Consolidated the .NET app direction around a single runtime project in `backend/` (MVC + Web API in one host).
+- Updated root solution definition (`AISupportAgent.slnx`) to include only `backend/backend.csproj`.
+- Updated backend OAuth callback redirect to use same-host MVC dashboard route (`/Dashboard/Settings`) instead of external frontend URL.
+- Refreshed setup/instruction docs (`SETUP_DOTNET.md`, `backend/AGENTS.md`) to match single-project full-stack architecture.
