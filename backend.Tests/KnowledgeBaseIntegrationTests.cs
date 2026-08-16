@@ -1,3 +1,5 @@
+using System.Net;
+using System.Text;
 using System.Text.Json;
 
 namespace backend.Tests;
@@ -12,8 +14,10 @@ public class KnowledgeBaseIntegrationTests : IClassFixture<TestWebApplicationFac
     }
 
     [Fact]
-    public async Task ListKnowledge_ReturnsSeededRows_FromInMemoryDatabase()
+    public async Task ListKnowledge_IncludesRowCreatedByApi()
     {
+        var createdId = await CreateKnowledgeEntryAsync("List test entry", "general");
+
         var response = await _client.GetAsync("/api/knowledge");
         response.EnsureSuccessStatusCode();
 
@@ -21,26 +25,21 @@ public class KnowledgeBaseIntegrationTests : IClassFixture<TestWebApplicationFac
         using var document = JsonDocument.Parse(content);
 
         Assert.Equal(JsonValueKind.Array, document.RootElement.ValueKind);
-        Assert.True(document.RootElement.GetArrayLength() >= 1);
+        Assert.Contains(
+            document.RootElement.EnumerateArray(),
+            item => item.TryGetProperty("id", out var idProp) && idProp.GetGuid() == createdId);
     }
 
     [Fact]
     public async Task DeleteKnowledge_RemovesEntry_AndReturnsNotFoundOnSecondDelete()
     {
-        var listResponse = await _client.GetAsync("/api/knowledge");
-        listResponse.EnsureSuccessStatusCode();
-
-        var listContent = await listResponse.Content.ReadAsStringAsync();
-        using var beforeDelete = JsonDocument.Parse(listContent);
-
-        var firstItem = beforeDelete.RootElement.EnumerateArray().First();
-        var id = firstItem.GetProperty("id").GetGuid();
+        var id = await CreateKnowledgeEntryAsync("Delete test entry", "technical");
 
         var deleteResponse = await _client.DeleteAsync($"/api/knowledge/{id}");
-        Assert.Equal(System.Net.HttpStatusCode.NoContent, deleteResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
 
         var secondDeleteResponse = await _client.DeleteAsync($"/api/knowledge/{id}");
-        Assert.Equal(System.Net.HttpStatusCode.NotFound, secondDeleteResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, secondDeleteResponse.StatusCode);
 
         var afterListResponse = await _client.GetAsync("/api/knowledge");
         afterListResponse.EnsureSuccessStatusCode();
@@ -51,5 +50,25 @@ public class KnowledgeBaseIntegrationTests : IClassFixture<TestWebApplicationFac
         Assert.DoesNotContain(
             afterDelete.RootElement.EnumerateArray(),
             item => item.GetProperty("id").GetGuid() == id);
+    }
+
+    private async Task<Guid> CreateKnowledgeEntryAsync(string content, string category)
+    {
+        var payload = JsonSerializer.Serialize(new
+        {
+            content,
+            category
+        });
+
+        var response = await _client.PostAsync(
+            "/api/knowledge",
+            new StringContent(payload, Encoding.UTF8, "application/json"));
+
+        response.EnsureSuccessStatusCode();
+
+        var body = await response.Content.ReadAsStringAsync();
+        using var document = JsonDocument.Parse(body);
+
+        return document.RootElement.GetProperty("id").GetGuid();
     }
 }
