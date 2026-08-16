@@ -21,7 +21,7 @@ public class KnowledgeBaseIntegrationTests : IClassFixture<TestWebApplicationFac
         using var document = JsonDocument.Parse(content);
 
         Assert.Equal(JsonValueKind.Array, document.RootElement.ValueKind);
-        Assert.True(document.RootElement.GetArrayLength() >= 10);
+        Assert.True(document.RootElement.GetArrayLength() >= 1);
     }
 
     [Fact]

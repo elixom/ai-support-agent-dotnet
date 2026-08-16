@@ -26,3 +26,9 @@
   - `KnowledgeBaseIntegrationTests` validates `GET /api/knowledge` succeeds and returns seeded InMemory rows.
 - Added `Microsoft.AspNetCore.Mvc.Testing` package to `backend.Tests/backend.Tests.csproj`.
 - Added `public partial class Program { }` at end of `backend/Program.cs` to support host bootstrapping in integration tests.
+- Extended `backend.Tests/KnowledgeBaseIntegrationTests.cs` with delete flow coverage:
+  - Pulls a KB id from `GET /api/knowledge`.
+  - Verifies first delete returns `204 NoContent`.
+  - Verifies second delete returns `404 NotFound`.
+  - Verifies deleted id is absent from subsequent list.
+- Relaxed seeded-list assertion from `>=10` to `>=1` to avoid shared-fixture order dependence.
