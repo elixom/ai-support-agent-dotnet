@@ -188,3 +188,5 @@ async Task SeedDataAsync(ApplicationDbContext db, IEmbeddingService embeddingSer
     await db.SaveChangesAsync();
     Console.WriteLine("Seeded 10 knowledge base entries successfully.");
 }
+
+public partial class Program { }
