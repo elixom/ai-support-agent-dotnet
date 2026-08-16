@@ -3356,33 +3356,32 @@
     ]
   },
   "packageFolders": {
-    "/home/jules/.nuget/packages/": {}
+    "/home/codespace/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/app/backend.Tests/backend.Tests.csproj",
+      "projectUniqueName": "/workspaces/ai-support-agent-dotnet/backend.Tests/backend.Tests.csproj",
       "projectName": "backend.Tests",
-      "projectPath": "/app/backend.Tests/backend.Tests.csproj",
-      "packagesPath": "/home/jules/.nuget/packages/",
-      "outputPath": "/app/backend.Tests/obj/",
+      "projectPath": "/workspaces/ai-support-agent-dotnet/backend.Tests/backend.Tests.csproj",
+      "packagesPath": "/home/codespace/.nuget/packages/",
+      "outputPath": "/workspaces/ai-support-agent-dotnet/backend.Tests/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/home/jules/.nuget/NuGet/NuGet.Config"
+        "/home/codespace/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net10.0"
       ],
       "sources": {
-        "/usr/lib/dotnet/library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net10.0": {
           "targetAlias": "net10.0",
           "projectReferences": {
-            "/app/backend/backend.csproj": {
-              "projectPath": "/app/backend/backend.csproj"
+            "/workspaces/ai-support-agent-dotnet/backend/backend.csproj": {
+              "projectPath": "/workspaces/ai-support-agent-dotnet/backend/backend.csproj"
             }
           }
         }
@@ -3397,7 +3396,7 @@
         "auditLevel": "low",
         "auditMode": "all"
       },
-      "SdkAnalysisLevel": "10.0.100"
+      "SdkAnalysisLevel": "10.0.200"
     },
     "frameworks": {
       "net10.0": {
@@ -3436,7 +3435,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/10.0.103/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/10.0.200/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.CSharp": "(,4.7.32767]",
           "Microsoft.VisualBasic": "(,10.4.32767]",

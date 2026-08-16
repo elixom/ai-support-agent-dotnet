@@ -34,7 +34,7 @@ builder.Services.AddHttpClient();
 // 3. Database context with SQL Server
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? Environment.GetEnvironmentVariable("DATABASE_URL")
-    ?? "Server=db,1433;Database=support_agent;User Id=sa;Password=Your_Secure_Password123!;Encrypt=False;TrustServerCertificate=True;";
+    ?? "Server=localhost,1433;Database=support_agent;User Id=sa;Password=Your_Secure_Password123!;Encrypt=False;TrustServerCertificate=True;";
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
@@ -49,6 +49,7 @@ builder.Services.AddScoped<IConversationService, ConversationService>();
 
 // 5. Authentication Configuration (JWT Bearer)
 var jwtSecret = builder.Configuration["JWT_SECRET"]
+    ?? builder.Configuration["Jwt:SecretKey"]
     ?? "super-secret-temporary-key-that-must-be-long-enough-for-hs256";
 var key = Encoding.UTF8.GetBytes(jwtSecret);
 
@@ -80,18 +81,19 @@ builder.Services.AddControllersWithViews()
 
 var app = builder.Build();
 
-// 6. Database Auto-Creation
+// 6. Database migrations + seed
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     try
     {
-        db.Database.EnsureCreated();
+        await db.Database.MigrateAsync();
         await SeedDataAsync(db, scope.ServiceProvider.GetRequiredService<IEmbeddingService>());
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Database creation/seeding failed: {ex.Message}");
+        Console.WriteLine($"Database migration/seeding failed: {ex.Message}");
+        throw;
     }
 }
 
@@ -102,6 +104,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowNextJs");
+app.UseStaticFiles();
 
 // 8. WebSocket Middleware setup
 app.UseWebSockets(new WebSocketOptions
@@ -114,6 +117,7 @@ app.UseMiddleware<WebSocketChatMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapDefaultControllerRoute();
 app.MapControllers();
 
 app.Run();
