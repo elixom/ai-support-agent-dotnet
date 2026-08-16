@@ -20,3 +20,9 @@
   - InMemory/non-relational providers: `Database.EnsureCreatedAsync()`.
 - Added package reference `Microsoft.EntityFrameworkCore.InMemory` to `backend/backend.csproj`.
 - Added `backend/appsettings.Testing.json` with InMemory enabled by default.
+- Added integration test harness in `backend.Tests`:
+  - `TestWebApplicationFactory` sets environment to `Testing`, enables `Database:UseInMemory=true`, and isolates DB name per run.
+  - `TestAuthHandler` provides authenticated principal for `[Authorize]` endpoints.
+  - `KnowledgeBaseIntegrationTests` validates `GET /api/knowledge` succeeds and returns seeded InMemory rows.
+- Added `Microsoft.AspNetCore.Mvc.Testing` package to `backend.Tests/backend.Tests.csproj`.
+- Added `public partial class Program { }` at end of `backend/Program.cs` to support host bootstrapping in integration tests.

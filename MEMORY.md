@@ -13,3 +13,5 @@
 - Added optional EF Core InMemory database mode for backend runtime (`Database:UseInMemory` / `USE_INMEMORY_DB`).
 - Added `appsettings.Testing.json` defaults for isolated in-memory test runs.
 - Updated backend initialization flow to use `EnsureCreatedAsync()` for non-relational providers and `MigrateAsync()` for relational providers.
+- Added backend integration testing infrastructure using `WebApplicationFactory<Program>` with forced InMemory DB and test auth scheme.
+- Added `KnowledgeBaseIntegrationTests` to verify authenticated `/api/knowledge` works against seeded InMemory data.
