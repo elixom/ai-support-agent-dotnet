@@ -19,8 +19,8 @@ This is the **backend** for a production-ready AI customer support agent handlin
   - WhatsApp Business Cloud API (Meta)
   - Gmail API (Google Cloud, service account)
   - Native WebSocket support (ASP.NET Core middleware)
-- **Frontend:** Next.js 15 (separate dashboard repo)
-- **Infrastructure:** Docker Compose (SQL Server 2022, Redis, .NET 10 backend, Next.js frontend)
+- **Frontend:** Same .NET project
+- **Infrastructure:** No Docker Compose 
 
 ---
 

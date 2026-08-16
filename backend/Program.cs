@@ -31,13 +31,31 @@ builder.Services.AddCors(options =>
 // 2. HTTP Client registration
 builder.Services.AddHttpClient();
 
-// 3. Database context with SQL Server
+// 3. Database context (SQL Server by default, optional InMemory for dev/tests)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? Environment.GetEnvironmentVariable("DATABASE_URL")
     ?? "Server=localhost,1433;Database=support_agent;User Id=sa;Password=Your_Secure_Password123!;Encrypt=False;TrustServerCertificate=True;";
 
+var useInMemoryDatabase = builder.Configuration.GetValue<bool>("Database:UseInMemory")
+    || string.Equals(builder.Configuration["Database:Provider"], "InMemory", StringComparison.OrdinalIgnoreCase)
+    || string.Equals(Environment.GetEnvironmentVariable("USE_INMEMORY_DB"), "true", StringComparison.OrdinalIgnoreCase);
+
+var inMemoryDatabaseName = builder.Configuration["Database:InMemoryName"] ?? "support_agent_dev";
+
+Console.WriteLine(useInMemoryDatabase
+    ? "Using InMemory database: " + inMemoryDatabaseName
+    : "Using SQL Server database provider.");
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+{
+    if (useInMemoryDatabase)
+    {
+        options.UseInMemoryDatabase(inMemoryDatabaseName);
+        return;
+    }
+
+    options.UseSqlServer(connectionString);
+});
 
 // 4. Dependency Injection for AI, Conversations and Token Services
 builder.Services.AddScoped<ITokenService, TokenService>();
@@ -81,18 +99,26 @@ builder.Services.AddControllersWithViews()
 
 var app = builder.Build();
 
-// 6. Database migrations + seed
+// 6. Database schema initialization + seed
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     try
     {
-        await db.Database.MigrateAsync();
+        if (db.Database.IsRelational())
+        {
+            await db.Database.MigrateAsync();
+        }
+        else
+        {
+            await db.Database.EnsureCreatedAsync();
+        }
+
         await SeedDataAsync(db, scope.ServiceProvider.GetRequiredService<IEmbeddingService>());
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Database migration/seeding failed: {ex.Message}");
+        Console.WriteLine("Database initialization/seeding failed: " + ex.Message);
         throw;
     }
 }

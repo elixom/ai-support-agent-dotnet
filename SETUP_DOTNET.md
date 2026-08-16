@@ -61,6 +61,11 @@ OPENAI_API_KEY=sk-your-openai-key-here
 
 # JWT Configuration
 JWT_SECRET=super-secret-temporary-key-that-must-be-long-enough-for-hs256
+
+# Optional: force EF Core InMemory provider (great for local testing)
+USE_INMEMORY_DB=true
+# Optional name when using InMemory
+Database__InMemoryName=support_agent_dev
 ```
 
 ---
@@ -85,17 +90,34 @@ docker compose up -d --build
 
 ### Option B: Running Locally (For Development)
 
-#### 1. Spin up SQL Server & Redis in Docker
+#### 1. Start SQL Server locally (no Docker required)
+
+Install/start SQL Server (local service, SQL Express, or Azure SQL), then set one of:
+
+- `ConnectionStrings__DefaultConnection`
+- `DATABASE_URL`
+
+Example:
+
 ```bash
-docker compose up db redis -d
+export ConnectionStrings__DefaultConnection="Server=localhost,1433;Database=support_agent;User Id=sa;Password=Your_Secure_Password123!;Encrypt=False;TrustServerCertificate=True;"
 ```
 
-#### 2. Start the .NET 10 Backend
+To switch to the EF Core InMemory provider (no SQL Server required), set either:
+
+- `Database__UseInMemory=true`
+- `USE_INMEMORY_DB=true`
+
+Optional: set `Database__InMemoryName` to isolate test runs.
+
+#### 2. Apply EF Core migrations and start backend
 ```bash
 cd backend
+dotnet tool restore
+dotnet ef database update
 dotnet run
 ```
-The backend automatically creates the SQL Server database schema on startup and seeds **10 standard sample FAQ Knowledge Base entries** (no manual migration scripts are required!). It will listen on `http://localhost:8000`.
+The backend applies pending migrations on startup and seeds **10 standard sample FAQ Knowledge Base entries**. It listens on `http://localhost:8000` in development.
 
 #### 3. Start the Next.js Dashboard
 ```bash
@@ -117,7 +139,7 @@ Since the backend is written using standard ASP.NET Core, it runs natively on **
    ```bash
    dotnet publish backend/backend.csproj -c Release
    ```
-4. Set up an **Azure SQL Database** and paste its connection string into `DATABASE_URL` or `ConnectionStrings__DefaultConnection` (Entity Framework will automatically deploy the schema on startup!).
+4. Set up an **Azure SQL Database** and paste its connection string into `DATABASE_URL` or `ConnectionStrings__DefaultConnection` (run `dotnet ef database update` during deployment or rely on startup migrations).
 
 ---
 

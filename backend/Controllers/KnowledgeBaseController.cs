@@ -42,10 +42,26 @@ namespace backend.Controllers
                 id = kb.Id,
                 content = kb.Content,
                 category = kb.Category,
+                source_file = TryGetSourceFile(kb.MetadataJson),
                 metadata = string.IsNullOrEmpty(kb.MetadataJson) ? new object() : JsonSerializer.Deserialize<object>(kb.MetadataJson),
                 created_at = kb.CreatedAt,
                 updated_at = kb.UpdatedAt
             }));
+        }
+
+        [HttpDelete("knowledge/{id}")]
+        public async Task<IActionResult> DeleteKnowledge(Guid id)
+        {
+            var kb = await _db.KnowledgeBases.FirstOrDefaultAsync(x => x.Id == id);
+            if (kb == null)
+            {
+                return NotFound(new { error = "Knowledge base entry not found." });
+            }
+
+            _db.KnowledgeBases.Remove(kb);
+            await _db.SaveChangesAsync();
+
+            return NoContent();
         }
 
         // ---------------------------------------------------------------------------
@@ -157,6 +173,29 @@ namespace backend.Controllers
             {
                 return BadRequest(new { error = $"Failed to read file: {ex.Message}" });
             }
+        }
+
+        private static string? TryGetSourceFile(string? metadataJson)
+        {
+            if (string.IsNullOrWhiteSpace(metadataJson))
+            {
+                return null;
+            }
+
+            try
+            {
+                using var doc = JsonDocument.Parse(metadataJson);
+                if (doc.RootElement.TryGetProperty("source_file", out var sourceProp) && sourceProp.ValueKind == JsonValueKind.String)
+                {
+                    return sourceProp.GetString();
+                }
+            }
+            catch
+            {
+                return null;
+            }
+
+            return null;
         }
     }
 }
